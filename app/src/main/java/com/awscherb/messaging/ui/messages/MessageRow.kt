@@ -1,11 +1,17 @@
 package com.awscherb.messaging.ui.messages
 
 import android.text.format.DateUtils
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +28,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 
-
 @Composable
 fun MessageRow(
     messageThread: MessageThread
@@ -32,7 +37,8 @@ fun MessageRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         val (who, message, time) = createRefs()
-        Text(
+
+        Box(
             modifier = Modifier
                 .constrainAs(who) {
                     linkTo(
@@ -42,15 +48,21 @@ fun MessageRow(
                         start = parent.start
                     )
                 }
-                .padding(32.dp)
-                .drawBehind {
-                    drawCircle(
-                        color = Purple80,
-                        radius = this.size.maxDimension
-                    )
-                },
-            text = messageThread.from.substring(0..2),
-        )
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Purple80)
+            )
+
+            Text(
+                text = messageThread.from.substring(0..2),
+            )
+        }
 
         Text(
             modifier = Modifier.constrainAs(message) {
@@ -63,22 +75,20 @@ fun MessageRow(
                 width = Dimension.fillToConstraints
             },
             text = messageThread.message,
-            maxLines = 1,
-            overflow = TextOverflow.Clip
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
 
         Text(
             modifier = Modifier
                 .constrainAs(time) {
-                    linkTo(
-                        top = message.top,
-                        bottom = message.top,
-                        end = parent.end,
-                        start = message.end
-                    )
+                    top.linkTo(message.top)
+                    end.linkTo(parent.end)
 
                 }
-                .padding(end = 16.dp),
+                .padding(
+                    end = 16.dp,
+                ),
             text = PrettyTime().format(Date(messageThread.time)),
             maxLines = 1,
 
@@ -98,7 +108,7 @@ fun MessageRowPreview() {
             MessageThread(
                 id = "1",
                 from = "3125550690",
-                message = "Hello, world!",
+                message = "Hello, world with a super long message and some will be cut off!",
                 time = System.currentTimeMillis()
             )
         )
