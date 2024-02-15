@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,7 @@ fun MessageRow(
             )
 
             Text(
-                text = messageThread.from.substring(0..2),
+                text = messageThread.from.getPreviewText(),
             )
         }
 
@@ -98,6 +99,19 @@ fun MessageRow(
     }
 }
 
+private fun String.getPreviewText(): String {
+    return if (!this.contains(" ")) {
+        return this
+    } else {
+        val parts = split(" ")
+        if (parts.size == 1) {
+            parts[0].getPreviewText()
+        } else {
+            parts[0][0].toString().capitalize() + parts[1][0].toString().capitalize()
+        }
+    }
+}
+
 
 @Preview(apiLevel = 33, showBackground = true)
 @Composable
@@ -107,7 +121,7 @@ fun MessageRowPreview() {
             messageThread =
             MessageThread(
                 id = "1",
-                from = "3125550690",
+                from = "First Name",
                 message = "Hello, world with a super long message and some will be cut off!",
                 time = System.currentTimeMillis()
             )
