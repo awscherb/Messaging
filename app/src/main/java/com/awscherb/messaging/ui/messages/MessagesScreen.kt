@@ -34,7 +34,7 @@ fun MessageScreenPreview() {
     MessagingTheme {
         MessagesScreen(
             messages =
-            listOf(MessageThread("1", "212", "message", System.currentTimeMillis()))
+            listOf(MessageThread("1", listOf("212"), "message", System.currentTimeMillis()))
         ) {
 
         }

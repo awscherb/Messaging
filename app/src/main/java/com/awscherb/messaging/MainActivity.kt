@@ -3,7 +3,6 @@ package com.awscherb.messaging
 import android.Manifest
 import android.content.ContentResolver
 import android.content.pm.PackageManager
-import android.database.DatabaseUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,7 +14,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.DatePicker
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.database.getStringOrNull
@@ -132,67 +130,13 @@ class MainActivity : ComponentActivity() {
 
         smsState.value = msg.map {
             MessageThread(id = it.id,
-                from = it.recipients.joinToString(separator = ",") { recip -> recipContactMap[recip] ?:
-                recipAddrMap[recip] ?: "" },
+                participants = it.recipients.map { recipId -> recipContactMap[recipId] ?: recipAddrMap[recipId] ?: "" },
                 message = it.message,
                 time = it.date)
         }
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun readSms(limit: Int = 50, offset: Int = 0) {
-
-        val cursorStart = limit * offset
-
-        val ids = mutableListOf<MessageThread>()
-        contentResolver.query(
-            Threads.CONTENT_URI,
-            null,
-            Bundle().apply {
-                putString(
-                    ContentResolver.QUERY_ARG_SQL_SORT_ORDER,
-                    "${TextBasedSmsColumns.DATE} DESC"
-                )
-            },
-            null,
-        )?.use {
-            println("sms count is ${it.count}")
-            it.moveToFirst()
-            it.move(cursorStart)
-            var i = 0
-            while (!it.isAfterLast && i < limit) {
-
-                val from = it.getString(it.getColumnIndexOrThrow(TextBasedSmsColumns.ADDRESS))
-                val name = contentResolver.query(
-                    Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, from),
-                    null,
-                    null,
-                    null,
-                    null
-                )?.use {
-                    it.moveToFirst()
-                    if (!it.isAfterLast) {
-                        val gotten = it.getString(it.getColumnIndexOrThrow("display_name"))
-                        gotten
-                    } else from
-                } ?: from
-
-                ids += MessageThread(
-                    id = it.getString(it.getColumnIndexOrThrow(BaseColumns._ID)) ?: "",
-                    from = name,
-                    message = it.getString(it.getColumnIndexOrThrow(TextBasedSmsColumns.BODY)),
-                    time = it.getLong(it.getColumnIndexOrThrow(TextBasedSmsColumns.DATE))
-
-                )
-                it.moveToNext()
-                i++
-            }
-        }
-
-
-        smsState.value = ids
-    }
 }
 
 data class MessagePartial(
@@ -204,7 +148,7 @@ data class MessagePartial(
 
 data class MessageThread(
     val id: String,
-    val from: String,
+    val participants: List<String>,
     val message: String,
     val time: Long
 )
