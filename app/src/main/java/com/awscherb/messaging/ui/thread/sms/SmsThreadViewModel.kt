@@ -5,9 +5,12 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.paging.PagingData
+import com.awscherb.messaging.pager.SmsPager
 import com.awscherb.messaging.ui.thread.common.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
@@ -19,6 +22,8 @@ class SmsThreadViewModel @Inject constructor(
     val threadId = savedStateHandle.get<String>("id")
 
     val messages = MutableStateFlow<List<Message>>(emptyList())
+
+    val pagingFlow: Flow<PagingData<Message>> = SmsPager(context).getPagerFlow(threadId!!)
 
     init {
         val messagesList = mutableListOf<Message>()
@@ -41,3 +46,4 @@ class SmsThreadViewModel @Inject constructor(
         messages.value = messagesList
     }
 }
+
