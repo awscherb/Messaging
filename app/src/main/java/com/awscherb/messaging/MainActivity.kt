@@ -6,6 +6,9 @@ import android.database.DatabaseUtils
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.provider.Telephony
+import android.provider.Telephony.Mms
+import android.provider.Telephony.Sms.Conversations
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -89,14 +92,29 @@ class MainActivity : ComponentActivity() {
                 val date = it.getLong(it.getColumnIndexOrThrow("date"))
                 recipToLookup += recip
 
-                if (type == 1) {
-                    DatabaseUtils.dumpCurrentRow(it)
-                }
-
                 msg += MessagePartial(id.toString(), recip, message, date, type)
                 it.moveToNext()
                 i++
             }
+        }
+
+        contentResolver.query(Telephony.Sms.CONTENT_URI, null, null, null, "date DESC")?.use {
+            it.moveToFirst()
+            println("sms count ${it.count}")
+
+        }
+
+
+        contentResolver.query(Telephony.Mms.CONTENT_URI, null, null, null, "date DESC")?.use {
+            it.moveToFirst()
+            println("mms count ${it.count}")
+
+        }
+
+        contentResolver.query( Uri.parse("content://mms/part"), null, null, null, null)?.use {
+            it.moveToFirst()
+            println("mms PARt count ${it.count}")
+
         }
 
         val recipAddrMap = mutableMapOf<String, String>()
@@ -126,23 +144,6 @@ class MainActivity : ComponentActivity() {
                         threadMessageIdMap[msg.id] = first
                     }
 
-                    // it.moveToFirst()
-                    // while (!it.isAfterLast)  {
-                    //     DatabaseUtils.dumpCurrentRow(it)
-                    //     val partId: String = it.getString(it.getColumnIndexOrThrow("_id"))
-                    //     val type: String = it.getString(it.getColumnIndexOrThrow("ct"))
-                    //     if ("text/plain" == type) {
-                    //         val data: String? = it.getStringOrNull(it.getColumnIndexOrThrow("_data"))
-                    //         var body: String?
-                    //         if (data != null) {
-                    //             body = getMmsText(partId)
-                    //         } else {
-                    //             body = it.getString(it.getColumnIndexOrThrow("text"))
-                    //         }
-                    //         println("Body is $body")
-                    //     }
-                    //     it.moveToNext()
-                    // }
                 }
             }
         }
@@ -158,17 +159,21 @@ class MainActivity : ComponentActivity() {
 
                 if (it.moveToFirst()) {
                     do {
-                        val partId = it!!.getString(it!!.getColumnIndexOrThrow("_id"))
-                        val type = it!!.getString(it!!.getColumnIndexOrThrow("ct"))
+                        val partId = it.getString(it.getColumnIndexOrThrow("_id"))
+                        val type = it.getString(it.getColumnIndexOrThrow("ct"))
+                        println(type)
                         if ("text/plain" == type) {
-                            val data = it!!.getString(it!!.getColumnIndexOrThrow("_data"))
-                            var body: String = if (data != null) {
+                            val data = it.getString(it.getColumnIndexOrThrow("_data"))
+                            val body: String = if (data != null) {
                                 // implementation of this method below
                                 getMmsText(partId)
                             } else {
                                 it.getString(it.getColumnIndexOrThrow("text"))
                             }
                             threadIdBodyMap[threadId] = body
+                        }else if ("image/jpeg" == type) {
+                            threadIdBodyMap[threadId] = "Image"
+                            continue
                         }
                     } while (it.moveToNext())
                 }
@@ -195,7 +200,7 @@ class MainActivity : ComponentActivity() {
             MessageThread(
                 id = it.id,
                 participants = it.recipients.map { recipId -> recipContactMap[recipId] ?: recipAddrMap[recipId] ?: "" },
-                message = if (it.type == 0) it.message else threadIdBodyMap[it.id] ?: "Empy MSS",
+                message = if (it.type == 0) it.message else threadIdBodyMap[it.id] ?: "",
                 time = it.date
             )
         }
