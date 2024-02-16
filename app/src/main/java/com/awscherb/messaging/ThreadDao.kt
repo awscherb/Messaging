@@ -17,7 +17,7 @@ interface ThreadDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(threads: List<MessageThread>): LongArray
 
-    @Query("SELECT * FROM MessageThread ORDER BY date DESC")
+    @Query("SELECT * FROM MessageThread ORDER BY date DESC LIMIT 1000")
     fun listAllThreads(): Flow<List<MessageThread>>
 
     @Query("SELECT COUNT(threadId) FROM MessageThread")

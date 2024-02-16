@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.awscherb.messaging.data.MessageThread
+import com.awscherb.messaging.ui.ScaffoldScreen
 import com.awscherb.messaging.ui.theme.MessagingTheme
 
 @Composable
@@ -17,15 +18,12 @@ fun MessagesScreen(
     messages: List<MessageThread>,
     onLoadMore: () -> Unit
 ) {
-    LazyColumn {
-        items(messages, contentType = { 1 }, key = { it.threadId }) {
-            MessageRow(messageThread = it)
-        }
-        item {
-            Text(text = "Load More",
-                modifier = Modifier
-                    .padding(all = 16.dp)
-                    .clickable { onLoadMore() })
+    ScaffoldScreen(title = "Messages", navOnClick = { /*TODO*/ }) {
+
+        LazyColumn(modifier = Modifier.padding(it)) {
+            items(messages, contentType = { 1 }, key = { it.threadId }) {
+                MessageRow(messageThread = it)
+            }
         }
     }
 }
