@@ -3,6 +3,7 @@ package com.awscherb.messaging.app
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.awscherb.messaging.worker.ThreadImportWorker

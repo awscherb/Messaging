@@ -1,6 +1,7 @@
 package com.awscherb.messaging.db
 
 import androidx.room.TypeConverter
+import com.awscherb.messaging.data.MessageType
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 
@@ -19,4 +20,10 @@ object MessagingTypeConverters {
         }.type
         return gson.fromJson(list, listType)
     }
+
+    @[TypeConverter JvmStatic]
+    fun fromMessageType(messageType: MessageType) = messageType.ordinal
+
+    @[TypeConverter JvmStatic]
+    fun toMessageType(ordinal: Int) = MessageType.entries[ordinal]
 }

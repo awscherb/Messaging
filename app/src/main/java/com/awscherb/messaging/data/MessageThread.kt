@@ -9,5 +9,8 @@ data class MessageThread(
     val threadId: String,
     val message: String,
     val date: Long,
-    val participants: List<String>
+    val participants: List<String>,
+    val read: Boolean,
+    val fromMe: Boolean,
+    val threadType: MessageType
 )
