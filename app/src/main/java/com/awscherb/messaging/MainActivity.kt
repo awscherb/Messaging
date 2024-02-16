@@ -1,19 +1,14 @@
 package com.awscherb.messaging
 
 import android.Manifest
-import android.content.ContentResolver
 import android.content.pm.PackageManager
+import android.database.DatabaseUtils
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.BaseColumns
 import android.provider.ContactsContract
-import android.provider.Telephony.TextBasedSmsColumns
-import android.provider.Telephony.Threads
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.database.getStringOrNull
@@ -22,6 +17,10 @@ import com.awscherb.messaging.ui.messages.MessagesScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 
 class MainActivity : ComponentActivity() {
 
@@ -85,14 +84,19 @@ class MainActivity : ComponentActivity() {
             while (i < 20) {
                 val id = it.getLong(it.getColumnIndexOrThrow("_id"))
                 val message = it.getStringOrNull(it.getColumnIndexOrThrow("snippet")) ?: "MMS"
+                val type = it.getInt(it.getColumnIndexOrThrow("type"))
                 val recip = it.getString(it.getColumnIndexOrThrow("recipient_ids")).split(" ")
                 val date = it.getLong(it.getColumnIndexOrThrow("date"))
                 recipToLookup += recip
-                msg += MessagePartial(id.toString(), recip, message, date)
+
+                if (type == 1) {
+                    DatabaseUtils.dumpCurrentRow(it)
+                }
+
+                msg += MessagePartial(id.toString(), recip, message, date, type)
                 it.moveToNext()
                 i++
             }
-            println("simple count is ${it.count}")
         }
 
         val recipAddrMap = mutableMapOf<String, String>()
@@ -109,6 +113,65 @@ class MainActivity : ComponentActivity() {
                 it.moveToFirst()
                 val addr = it.getString(it.getColumnIndexOrThrow("address"))
                 recipAddrMap[recip] = addr
+            }
+        }
+
+        val threadMessageIdMap = mutableMapOf<String, String>()
+        msg.forEach { msg ->
+            if (msg.type == 1) {
+                contentResolver.query(Uri.parse("content://mms"), null, "thread_id=${msg.id}", null, "date DESC")?.use {
+                    it.moveToFirst()
+                    if (!it.isAfterLast) {
+                        val first = it.getString(it.getColumnIndexOrThrow("_id")) // or m_id ?
+                        threadMessageIdMap[msg.id] = first
+                    }
+
+                    // it.moveToFirst()
+                    // while (!it.isAfterLast)  {
+                    //     DatabaseUtils.dumpCurrentRow(it)
+                    //     val partId: String = it.getString(it.getColumnIndexOrThrow("_id"))
+                    //     val type: String = it.getString(it.getColumnIndexOrThrow("ct"))
+                    //     if ("text/plain" == type) {
+                    //         val data: String? = it.getStringOrNull(it.getColumnIndexOrThrow("_data"))
+                    //         var body: String?
+                    //         if (data != null) {
+                    //             body = getMmsText(partId)
+                    //         } else {
+                    //             body = it.getString(it.getColumnIndexOrThrow("text"))
+                    //         }
+                    //         println("Body is $body")
+                    //     }
+                    //     it.moveToNext()
+                    // }
+                }
+            }
+        }
+
+        val threadIdBodyMap = mutableMapOf<String, String>()
+        threadMessageIdMap.forEach { threadId, messageId ->
+            val selectionPart = "mid=$messageId"
+            val uri = Uri.parse("content://mms/part")
+            contentResolver.query(
+                uri, null,
+                selectionPart, null, null
+            )?.use {
+
+                if (it.moveToFirst()) {
+                    do {
+                        val partId = it!!.getString(it!!.getColumnIndexOrThrow("_id"))
+                        val type = it!!.getString(it!!.getColumnIndexOrThrow("ct"))
+                        if ("text/plain" == type) {
+                            val data = it!!.getString(it!!.getColumnIndexOrThrow("_data"))
+                            var body: String = if (data != null) {
+                                // implementation of this method below
+                                getMmsText(partId)
+                            } else {
+                                it.getString(it.getColumnIndexOrThrow("text"))
+                            }
+                            threadIdBodyMap[threadId] = body
+                        }
+                    } while (it.moveToNext())
+                }
             }
         }
 
@@ -129,21 +192,51 @@ class MainActivity : ComponentActivity() {
         }
 
         smsState.value = msg.map {
-            MessageThread(id = it.id,
+            MessageThread(
+                id = it.id,
                 participants = it.recipients.map { recipId -> recipContactMap[recipId] ?: recipAddrMap[recipId] ?: "" },
-                message = it.message,
-                time = it.date)
+                message = if (it.type == 0) it.message else threadIdBodyMap[it.id] ?: "Empy MSS",
+                time = it.date
+            )
         }
-
     }
 
+    private fun getMmsText(id: String): String {
+        val partURI = Uri.parse("content://mms/part/$id")
+        var `is`: InputStream? = null
+        val sb = StringBuilder()
+        try {
+            `is` = contentResolver.openInputStream(partURI)
+            if (`is` != null) {
+                val isr = InputStreamReader(`is`, "UTF-8")
+                val reader = BufferedReader(isr)
+                var temp = reader.readLine()
+                while (temp != null) {
+                    sb.append(temp)
+                    temp = reader.readLine()
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            if (`is` != null) {
+                try {
+                    `is`.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return sb.toString()
+    }
 }
 
 data class MessagePartial(
     val id: String,
     val recipients: List<String>,
     val message: String,
-    val date: Long
+    val date: Long,
+    val type: Int // 0 = sms, 1 = mms
 )
 
 data class MessageThread(
