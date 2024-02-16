@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.awscherb.messaging.MessageThread
+import com.awscherb.messaging.data.MessageThread
 import com.awscherb.messaging.ui.theme.MessagingTheme
 import com.awscherb.messaging.ui.theme.Purple80
 import com.awscherb.messaging.ui.theme.Typography
@@ -158,7 +158,7 @@ fun MessageRow(
                 .padding(
                     end = 16.dp,
                 ),
-            text = PrettyTime().format(Date(messageThread.time)),
+            text = PrettyTime().format(Date(messageThread.date)),
             maxLines = 1,
 
 
@@ -216,10 +216,10 @@ fun MessageRowPreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = listOf("First Name"),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -232,10 +232,10 @@ fun MessageRowEmptyNamePreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = emptyList(),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -248,10 +248,10 @@ fun MessageRowNumberPreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = listOf("+13125550690"),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -264,10 +264,10 @@ fun MessageRowEmptyNameStringPreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = listOf(""),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -280,10 +280,10 @@ fun MessageRowTwoNamePreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = listOf("First Name", "Second Name"),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -296,10 +296,10 @@ fun MessageRowThreeNamePreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = listOf("First Name", "SecondName", "Third Name"),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -312,10 +312,10 @@ fun MessageRowFourNamePreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
+                threadId = "1",
                 participants = listOf("First Name", "Second Name", "Third Name", "Fourth Name"),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }
@@ -328,10 +328,16 @@ fun MessageRowManyPreview() {
         MessageRow(
             messageThread =
             MessageThread(
-                id = "1",
-                participants = listOf("FirstName", "Second Name", "Third Name", "Fourth Name", "Fifth Name"),
+                threadId = "1",
+                participants = listOf(
+                    "FirstName",
+                    "Second Name",
+                    "Third Name",
+                    "Fourth Name",
+                    "Fifth Name"
+                ),
                 message = "Hello, world with a super long message and some will be cut off!",
-                time = System.currentTimeMillis()
+                date = System.currentTimeMillis()
             )
         )
     }

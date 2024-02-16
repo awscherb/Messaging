@@ -9,21 +9,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.awscherb.messaging.MessageThread
+import com.awscherb.messaging.data.MessageThread
 import com.awscherb.messaging.ui.theme.MessagingTheme
 
 @Composable
 fun MessagesScreen(
     messages: List<MessageThread>,
-    onLoadMore : () -> Unit
+    onLoadMore: () -> Unit
 ) {
     LazyColumn {
-        items(messages) {
+        items(messages, contentType = { 1 }, key = { it.threadId }) {
             MessageRow(messageThread = it)
         }
         item {
             Text(text = "Load More",
-                modifier = Modifier.padding(all = 16.dp).clickable { onLoadMore() })
+                modifier = Modifier
+                    .padding(all = 16.dp)
+                    .clickable { onLoadMore() })
         }
     }
 }
@@ -34,7 +36,14 @@ fun MessageScreenPreview() {
     MessagingTheme {
         MessagesScreen(
             messages =
-            listOf(MessageThread("1", listOf("212"), "message", System.currentTimeMillis()))
+            listOf(
+                MessageThread(
+                    threadId = "1",
+                    message = "message",
+                    date = System.currentTimeMillis(),
+                    participants = listOf("212")
+                )
+            )
         ) {
 
         }
