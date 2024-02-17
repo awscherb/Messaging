@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.material3)
     testImplementation(libs.junit)
     implementation(libs.gson)
+    implementation(libs.coil)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.accompanist.permissions)

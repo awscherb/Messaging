@@ -18,6 +18,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 
+// https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/4b14c35/src/com/android/providers/telephony/MmsSmsProvider.java
 class ThreadImportWorker(
     private val context: Context,
     private val contactService: ContactService,

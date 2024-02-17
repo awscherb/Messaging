@@ -5,4 +5,6 @@ data class Message(
     val text: String,
     val fromMe: Boolean,
     val contact: String?,
+    val date: Long,
+    val data: String? = null
 )

@@ -43,7 +43,8 @@ class SmsPager(val context: Context) {
                     val message = it.getString(it.getColumnIndexOrThrow("body"))
                     val id = it.getString(it.getColumnIndexOrThrow("_id"))
                     val fromMe = it.getInt(it.getColumnIndexOrThrow("type")) == 2
-                    messagesList += Message(id, message, fromMe, null)
+                    val date = it.getLong(it.getColumnIndexOrThrow("date"))
+                    messagesList += Message(id, message, fromMe, null, date)
                     it.moveToNext()
                 }
             }

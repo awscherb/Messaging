@@ -42,7 +42,6 @@ class MmsThreadViewModel @Inject constructor(
                 null, "DATE DESC LIMIT 10"
             )?.use {
                 println("In query ${it.count}")
-                DatabaseUtils.dumpCursor(it)
                 it.moveToFirst()
                 while (!it.isAfterLast) {
                     val id = it.getString(it.getColumnIndexOrThrow("_id"))
@@ -65,7 +64,6 @@ class MmsThreadViewModel @Inject constructor(
                     null,
                     null
                 )?.use {
-                    DatabaseUtils.dumpCursor(it)
                     it.moveToFirst()
                     while (!it.isAfterLast) {
                         val type = it.getInt(it.getColumnIndexOrThrow("type"))
@@ -92,7 +90,6 @@ class MmsThreadViewModel @Inject constructor(
             )?.use {
                 if (it.moveToFirst()) {
                     var body: String?
-                    DatabaseUtils.dumpCursor(it)
                     while (!it.isAfterLast) {
                         val mid = it.getString(it.getColumnIndexOrThrow("mid"))
                         val partId = it.getString(it.getColumnIndexOrThrow("_id"))
@@ -125,7 +122,7 @@ class MmsThreadViewModel @Inject constructor(
             mIdFromContact.forEach { (mId, contact) ->
                 msglist += Message(
                     mId, mIdBody[mId]?.lastOrNull() ?: "empty",
-                    mIdBox[mId] == 2, contact
+                    mIdBox[mId] == 2, contact, 0L
                 )
             }
             messages.value = msglist

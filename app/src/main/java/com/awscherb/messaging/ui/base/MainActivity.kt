@@ -25,17 +25,21 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.awscherb.messaging.data.MessageType
+import com.awscherb.messaging.service.ContactService
 import com.awscherb.messaging.ui.messages.MessagesScreen
 import com.awscherb.messaging.ui.theme.MessagingTheme
-import com.awscherb.messaging.ui.thread.mms.MmsThreadScreen
 import com.awscherb.messaging.ui.thread.sms.SmsThreadScreen
 import com.awscherb.messaging.worker.ThreadImportWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var contactService: ContactService
 
 
     companion object {
@@ -59,8 +63,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         if (Permissions.any {
                 checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
             }) {
@@ -68,6 +70,51 @@ class MainActivity : ComponentActivity() {
         } else {
             startImport()
         }
+
+//        println("query")
+//        val sms = mutableListOf<String>()
+//        val mms = mutableListOf<String>()
+//        contentResolver.query(
+//            // LIMIT removes MMS from combined result
+//            Uri.parse("content://mms-sms/conversations/680"),
+//            arrayOf("_id", "date", "date_sent", "read", "thread_id", "transport_type"),
+//            null,
+//            null,
+//            "DATE DESC LIMIT 4834"
+//        )?.use {
+//            println("cursor count ${it.count}")
+//            it.moveToFirst()
+//            var i = 0
+//            while (!it.isAfterLast) {
+//                val id = it.getString(it.getColumnIndexOrThrow("_id"))
+//                val transportType = it.getString(it.getColumnIndexOrThrow("transport_type"))
+//
+//                when (transportType) {
+//                    "sms" -> sms.add(id)
+//                    "mms" -> mms.add(id)
+//                }
+//
+//                i++
+////                val message = it.getString(it.getColumnIndexOrThrow("body"))
+////                val id = it.getString(it.getColumnIndexOrThrow("_id"))
+////                val fromMe = it.getInt(it.getColumnIndexOrThrow("transport_type")) == 2
+//                it.moveToNext()
+//            }
+//            println("sms ${sms}")
+//            println("mms ${mms}")
+//
+//            lifecycleScope.launch {
+//
+//                val msg = MmsHelper.getMessagesForMms(
+//                    this@MainActivity, mms, contactService
+//                )
+//
+//                println("mms count ${msg.size}")
+//                msg.forEach {
+//                    println(it)
+//                }
+//            }
+//        }
 
 
         val startDest = Destination.Messages
@@ -109,7 +156,7 @@ class MainActivity : ComponentActivity() {
                                 type = NavType.StringType
                             }
                         )) {
-                            MmsThreadScreen {
+                            SmsThreadScreen {
                                 navController.popBackStack()
                             }
                         }
