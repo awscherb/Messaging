@@ -31,7 +31,7 @@ fun MessagesScreen(
     MessageScreenInner(
         progress = progress,
         messages = messages,
-        threadOnClick =threadOnClick
+        threadOnClick = threadOnClick
     )
 }
 
@@ -41,7 +41,7 @@ fun MessageScreenInner(
     messages: List<MessageThread>,
     threadOnClick: (MessageThread) -> Unit
 ) {
-    ScaffoldScreen(title = "Messages", navOnClick = {  }) {
+    ScaffoldScreen(title = "Messages", navOnClick = { }) {
         if (progress != null) {
             Column(
                 modifier = Modifier

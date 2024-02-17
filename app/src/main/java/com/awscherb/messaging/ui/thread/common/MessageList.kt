@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,6 +55,7 @@ fun MessageList(
 fun MessageBubble(
     message: Message
 ) {
+    val screenWidth = (LocalConfiguration.current.screenWidthDp)
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 2.dp)
@@ -62,17 +65,18 @@ fun MessageBubble(
         val color: Color
         if (message.fromMe) {
             aligment = Alignment.End
-            color = Pink80
+            color = MaterialTheme.colorScheme.primaryContainer
         } else {
             aligment = Alignment.Start
-            color = Purple80
+            color = MaterialTheme.colorScheme.secondaryContainer
         }
 
         Column(
             modifier = Modifier.align(aligment)
+                .widthIn(0.dp, (screenWidth * .75).dp)
         ) {
             message.data?.let { partId ->
-                val width = (LocalConfiguration.current.screenWidthDp / 2)
+
                 val bitmap = getMmsImage(partId, LocalContext.current) ?: return@let
                 AsyncImage(
                     model = ImageRequest.Builder(
@@ -82,8 +86,9 @@ fun MessageBubble(
                         .build(),
                     contentDescription = "Image",
                     modifier = Modifier
-                        .width(width.dp)
-                        .height(((width * bitmap.height) / bitmap.width).dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .width((screenWidth / 2).dp)
+                        .height((((screenWidth / 2) * bitmap.height) / bitmap.width).dp)
                         .align(aligment)
                 )
             }

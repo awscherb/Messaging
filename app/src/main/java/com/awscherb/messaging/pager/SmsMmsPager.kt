@@ -101,7 +101,7 @@ class SmsMmsPager(
             return LoadResult.Page(
                 data = messagesList,
                 prevKey = if (page == 0) null else page - 1,
-                nextKey = page + 1
+                nextKey = null
             )
 
         }

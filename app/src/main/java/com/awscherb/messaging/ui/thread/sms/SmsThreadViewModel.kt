@@ -2,12 +2,10 @@ package com.awscherb.messaging.ui.thread.sms
 
 import android.app.Application
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.paging.PagingData
 import com.awscherb.messaging.pager.SmsMmsPager
-import com.awscherb.messaging.pager.SmsPager
 import com.awscherb.messaging.service.ContactService
 import com.awscherb.messaging.ui.thread.common.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
