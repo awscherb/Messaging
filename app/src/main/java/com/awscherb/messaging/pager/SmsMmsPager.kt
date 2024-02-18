@@ -8,16 +8,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.awscherb.messaging.content.MmsHelper
-import com.awscherb.messaging.ui.thread.common.Message
-import kotlinx.coroutines.CoroutineScope
+import com.awscherb.messaging.ui.thread.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.concurrent.thread
 
 class SmsMmsPager(
     val context: Context,

@@ -32,12 +32,14 @@ fun ScaffoldScreen(
     navIcon: ImageVector = Icons.Default.Menu,
     topBarActions: @Composable RowScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
-    content: @Composable (PaddingValues) -> Unit
+    bottomBar: @Composable () -> Unit = {},
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         floatingActionButton = floatingActionButton,
+        bottomBar = bottomBar,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {

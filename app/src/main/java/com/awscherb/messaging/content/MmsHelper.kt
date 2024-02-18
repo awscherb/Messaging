@@ -1,11 +1,9 @@
 package com.awscherb.messaging.content
 
 import android.content.Context
-import android.database.DatabaseUtils
 import android.net.Uri
 import com.awscherb.messaging.service.ContactService
-import com.awscherb.messaging.ui.thread.common.Message
-import com.awscherb.messaging.worker.MessagePartial
+import com.awscherb.messaging.ui.thread.Message
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedReader
 import java.io.IOException

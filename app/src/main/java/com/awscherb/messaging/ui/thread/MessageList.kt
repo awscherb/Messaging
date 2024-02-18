@@ -1,4 +1,4 @@
-package com.awscherb.messaging.ui.thread.common
+package com.awscherb.messaging.ui.thread
 
 import android.content.Context
 import android.graphics.Bitmap
