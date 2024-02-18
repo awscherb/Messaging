@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,20 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import coil.size.Dimension
-import coil.size.OriginalSize
-import coil.size.Size
-import com.awscherb.messaging.ui.theme.Pink80
-import com.awscherb.messaging.ui.theme.Purple80
+import com.awscherb.messaging.ui.util.TimeHolder
 import java.io.IOException
 import java.io.InputStream
+import java.util.Date
 
 
 @Composable
@@ -72,7 +67,8 @@ fun MessageBubble(
         }
 
         Column(
-            modifier = Modifier.align(aligment)
+            modifier = Modifier
+                .align(aligment)
                 .widthIn(0.dp, (screenWidth * .75).dp)
         ) {
             message.data?.let { partId ->
@@ -107,14 +103,15 @@ fun MessageBubble(
                 }
             }
         }
-        message.contact?.let {
-            Text(
-                text = message.contact,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .align(aligment)
-            )
-        }
+
+        val contact = message.contact
+        val prefix = if (contact != null) "$contact • " else ""
+        Text(
+            text = prefix + TimeHolder.prettyTime.format(Date(message.date)),
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .align(aligment)
+        )
     }
 }
 
@@ -143,9 +140,23 @@ private fun getMmsImage(_id: String, context: Context): Bitmap? {
 fun MessageListPreview() {
     MessageList(
         messages = listOf(
-            Message("1", "Hello, world!", true, "3125550690", 0L),
-            Message("2", "hey back!", false, "Contact", 0L, ""),
-            Message("3", "", false, null, 0L, "sata"),
+            Message("1", "Hello, world!", true, "3125550690", System.currentTimeMillis()),
+            Message(
+                "2",
+                "hey back!",
+                false,
+                "Contact",
+                System.currentTimeMillis() - 5 * 60 * 1000,
+                ""
+            ),
+            Message(
+                "3",
+                "text",
+                false,
+                null,
+                System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000,
+                "sata"
+            ),
         )
     )
 }

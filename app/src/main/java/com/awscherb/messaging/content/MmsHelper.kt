@@ -5,23 +5,30 @@ import android.database.DatabaseUtils
 import android.net.Uri
 import com.awscherb.messaging.service.ContactService
 import com.awscherb.messaging.ui.thread.common.Message
+import com.awscherb.messaging.worker.MessagePartial
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object MmsHelper {
+@Singleton
+class MmsHelper @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val contactService: ContactService
+) {
 
     suspend fun getMessagesForMms(
-        context: Context,
         ids: List<String>,
-        contactService: ContactService,
     ): List<Message> {
 
-        val messageIds = mutableListOf<String>()
-        val mIdBox = mutableMapOf<String, Int>()
-        val mIdDate = mutableMapOf<String, Long>()
+        val messageIdPartial = mutableMapOf<String,MmsPartial>()
 
+        val messageIds = mutableListOf<String>()
+
+        val mmsStart = System.currentTimeMillis()
         context.contentResolver.query(
             Uri.parse("content://mms"),
             null,
@@ -40,18 +47,22 @@ object MmsHelper {
                 }
 
                 messageIds += id
-                mIdBox[id] = box
-                mIdDate[id] = date
+                messageIdPartial[id] =
+                    messageIdPartial.getOrDefault(id, MmsPartial(id)).copy(
+                        fromMe = box == 2,
+                        date = date
+                    )
+
                 it.moveToNext()
             }
         }
+        println("mms took ${System.currentTimeMillis() - mmsStart}")
 
-        val mIdBody = mutableMapOf<String, MutableList<String>>()
-        val mIdData = mutableMapOf<String, String>()
+        // message ID to address - we use this to lookup contact from address
         val mIdAddr = mutableMapOf<String, String>()
-        val mIdFromContact = mutableMapOf<String, String>()
-
+        val addrStart = System.currentTimeMillis()
         messageIds.forEach { mid ->
+            // most expensive query
             context.contentResolver.query(
                 Uri.parse("content://mms/$mid/addr"),
                 null,
@@ -71,11 +82,18 @@ object MmsHelper {
                 }
             }
         }
+        println("Addr took ${System.currentTimeMillis() - addrStart}")
 
+        val contactStart = System.currentTimeMillis()
         mIdAddr.forEach { (mId, addr) ->
-            mIdFromContact[mId] = contactService.fetchContact(addr)?.displayName ?: ""
+            val contact = contactService.fetchContact(addr)?.displayName ?: ""
+            messageIdPartial[mId] = messageIdPartial.getOrDefault(mId, MmsPartial(mId)).copy(
+                contact = contact
+            )
         }
+        println("Contact lookup too ${System.currentTimeMillis() - contactStart}")
 
+        val partStat = System.currentTimeMillis()
         val selectionQuery = "mid IN (${messageIds.joinToString(",")})"
         context.contentResolver.query(
             Uri.parse("content://mms/part"),
@@ -92,40 +110,40 @@ object MmsHelper {
                         "text/plain" -> {
                             val data = it.getString(it.getColumnIndexOrThrow("_data"))
                             body = if (data != null) {
-                                // implementation of this method below
                                 getMmsText(partId, context)
                             } else {
                                 it.getString(it.getColumnIndexOrThrow("text"))
                             }
-                            mIdBody[mid] = mIdBody.getOrDefault(mid, mutableListOf())
-                                .also { it.add(body ?: "empty") }
+                            messageIdPartial[mid] = messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
+                                body = body
+                            )
                         }
 
                         "image/jpeg" -> {
-                            mIdData[mid]  = partId
+                            messageIdPartial[mid] = messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
+                                data = partId
+                            )
                         }
 
-
                         else -> {
-                            mIdBody[mid] =
-                                mIdBody.getOrDefault(mid, mutableListOf())
-                                    .also { it.add("") }
+                            // maybe do somethind
                         }
                     }
                     it.moveToNext()
                 }
             }
         }
+        println("Parts took ${System.currentTimeMillis() - partStat}")
 
         val msglist = mutableListOf<Message>()
-        mIdFromContact.forEach { (mId, contact) ->
+        messageIdPartial.forEach { (mId, partial) ->
             msglist += Message(
                 id = mId,
-                text = mIdBody[mId]?.lastOrNull() ?: "empty",
-                fromMe = mIdBox[mId] == 2,
-                contact = contact,
-                date = mIdDate[mId] ?: 0L,
-                data = mIdData[mId]
+                text = partial.body ?: "empty",
+                fromMe = partial.fromMe == true,
+                contact = partial.contact,
+                date = partial.date ?: 0L,
+                data = partial.data
             )
         }
         return msglist
@@ -160,5 +178,13 @@ object MmsHelper {
         return sb.toString()
     }
 
+    data class MmsPartial(
+        val id: String,
+        val fromMe: Boolean? = null,
+        val contact: String? = null,
+        val body: String? = null,
+        val date: Long? = null,
+        val data: String? = null
+    )
 
 }

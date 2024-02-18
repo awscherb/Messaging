@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.paging.PagingData
+import com.awscherb.messaging.content.MmsHelper
 import com.awscherb.messaging.pager.SmsMmsPager
 import com.awscherb.messaging.service.ContactService
 import com.awscherb.messaging.ui.thread.common.Message
@@ -17,14 +18,14 @@ import javax.inject.Inject
 @HiltViewModel
 class SmsThreadViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val contactService: ContactService,
+    private val mmsHelper: MmsHelper,
     @ApplicationContext context: Context
 ) : AndroidViewModel(context as Application) {
     val threadId = savedStateHandle.get<String>("id")
 
     val messages = MutableStateFlow<List<Message>>(emptyList())
 
-    val pagingFlow: Flow<PagingData<Message>> = SmsMmsPager(context, contactService).getPagerFlow(threadId!!)
+    val pagingFlow: Flow<PagingData<Message>> = SmsMmsPager(context, mmsHelper).getPagerFlow(threadId!!)
 
     init {
         println("thread id $threadId")
