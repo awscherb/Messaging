@@ -26,7 +26,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.awscherb.messaging.data.MessageType
 import com.awscherb.messaging.service.ContactService
-import com.awscherb.messaging.ui.messages.MessagesScreen
+import com.awscherb.messaging.ui.threadList.ThreadListScreen
 import com.awscherb.messaging.ui.theme.MessagingTheme
 import com.awscherb.messaging.ui.thread.ThreadScreen
 import com.awscherb.messaging.worker.ThreadImportWorker
@@ -71,7 +71,6 @@ class MainActivity : ComponentActivity() {
             startImport()
         }
 
-
         val startDest = Destination.Messages
         setContent {
             MessagingTheme {
@@ -89,7 +88,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = startDest.dest
                     ) {
                         composable(Destination.Messages.dest) {
-                            MessagesScreen {
+                            ThreadListScreen {
                                 when (it.threadType) {
                                     MessageType.SMS -> navController.navigate("sms/${it.threadId}")
                                     MessageType.MMS -> navController.navigate("mms/${it.threadId}")

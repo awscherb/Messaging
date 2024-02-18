@@ -1,4 +1,4 @@
-package com.awscherb.messaging.ui.messages
+package com.awscherb.messaging.ui.threadList
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,14 +21,17 @@ import com.awscherb.messaging.data.MessageType
 import com.awscherb.messaging.ui.base.ScaffoldScreen
 import com.awscherb.messaging.ui.theme.MessagingTheme
 
+/**
+ * List of threads, your inbox
+ */
 @Composable
-fun MessagesScreen(
-    viewModel: MessagesViewModel = hiltViewModel(),
+fun ThreadListScreen(
+    viewModel: ThreadsViewModel = hiltViewModel(),
     threadOnClick: (MessageThread) -> Unit
 ) {
     val progress by viewModel.progress.collectAsState()
     val messages by viewModel.messages.collectAsState(initial = emptyList())
-    MessageScreenInner(
+    ThreadListScreenInner(
         progress = progress,
         messages = messages,
         threadOnClick = threadOnClick
@@ -36,7 +39,7 @@ fun MessagesScreen(
 }
 
 @Composable
-fun MessageScreenInner(
+fun ThreadListScreenInner(
     progress: String? = null,
     messages: List<MessageThread>,
     threadOnClick: (MessageThread) -> Unit
@@ -65,7 +68,7 @@ fun MessageScreenInner(
         } else {
             LazyColumn(modifier = Modifier.padding(it)) {
                 items(messages, contentType = { 1 }, key = { it.threadId }) {
-                    MessageRow(messageThread = it, threadOnClick)
+                    ThreadRow(messageThread = it, threadOnClick)
                 }
             }
         }
@@ -76,7 +79,7 @@ fun MessageScreenInner(
 @Preview(apiLevel = 33)
 fun MessageScreenPreview() {
     MessagingTheme {
-        MessageScreenInner(
+        ThreadListScreenInner(
             messages = listOf(
                 MessageThread(
                     threadId = "1",
@@ -98,7 +101,7 @@ fun MessageScreenPreview() {
 @Preview(apiLevel = 33)
 fun MessageScreenProgressPreview() {
     MessagingTheme {
-        MessageScreenInner(
+        ThreadListScreenInner(
             progress = "Fetching threads",
             messages = listOf()
         ) {

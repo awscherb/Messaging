@@ -1,4 +1,4 @@
-package com.awscherb.messaging.ui.messages
+package com.awscherb.messaging.ui.threadList
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,7 +29,7 @@ import com.awscherb.messaging.ui.util.TimeHolder
 import java.util.Date
 
 @Composable
-fun MessageRow(
+fun ThreadRow(
     messageThread: MessageThread,
     onClick: (MessageThread) -> Unit = {}
 ) {
@@ -230,7 +230,7 @@ private fun String.toFirstName(): String {
 @Composable
 fun MessageRowPreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",
@@ -249,7 +249,7 @@ fun MessageRowPreview() {
 @Composable
 fun MessageRowEmptyNamePreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread = MessageThread(
                 threadId = "1",
                 participants = emptyList(),
@@ -267,7 +267,7 @@ fun MessageRowEmptyNamePreview() {
 @Composable
 fun MessageRowNumberPreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",
@@ -286,7 +286,7 @@ fun MessageRowNumberPreview() {
 @Composable
 fun MessageRowEmptyNameStringPreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",
@@ -305,7 +305,7 @@ fun MessageRowEmptyNameStringPreview() {
 @Composable
 fun MessageRowTwoNamePreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",
@@ -324,7 +324,7 @@ fun MessageRowTwoNamePreview() {
 @Composable
 fun MessageRowThreeNamePreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",
@@ -343,7 +343,7 @@ fun MessageRowThreeNamePreview() {
 @Composable
 fun MessageRowFourNamePreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",
@@ -362,7 +362,7 @@ fun MessageRowFourNamePreview() {
 @Composable
 fun MessageRowManyPreview() {
     MessagingTheme {
-        MessageRow(
+        ThreadRow(
             messageThread =
             MessageThread(
                 threadId = "1",

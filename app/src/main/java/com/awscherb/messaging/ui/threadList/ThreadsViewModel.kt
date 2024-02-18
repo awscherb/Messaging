@@ -1,4 +1,4 @@
-package com.awscherb.messaging.ui.messages
+package com.awscherb.messaging.ui.threadList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @HiltViewModel
-class MessagesViewModel @Inject constructor(
-    private val threadsDao: ThreadDao,
-    private val workManager: WorkManager
+class ThreadsViewModel @Inject constructor(
+    threadsDao: ThreadDao,
+    workManager: WorkManager
 ) : ViewModel() {
 
     val progress = MutableStateFlow<String?>(null)
