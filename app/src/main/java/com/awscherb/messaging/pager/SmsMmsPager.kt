@@ -1,8 +1,6 @@
 package com.awscherb.messaging.pager
 
 import android.content.Context
-import android.database.DatabaseUtils
-import android.net.Uri
 import android.provider.Telephony
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -12,7 +10,6 @@ import com.awscherb.messaging.content.MmsHelper
 import com.awscherb.messaging.dao.ThreadMessageRecordDao
 import com.awscherb.messaging.data.Message
 import com.awscherb.messaging.data.MessageType
-import com.awscherb.messaging.data.ThreadMessageRecord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -52,24 +49,20 @@ class SmsMmsPager(
         }
 
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Message> {
-            val page = withContext(Dispatchers.IO) {
+            return withContext(Dispatchers.IO) {
 
-                val loadStart = System.currentTimeMillis()
                 val page = params.key ?: 0
 
                 val skip = page * LIMIT
                 val messagesList = mutableListOf<Message>()
                 val smsIds = mutableListOf<String>()
                 val mmsIds = mutableListOf<String>()
-                val queryStart = System.currentTimeMillis()
-                println("thread is ${Thread.currentThread().name}")
 
                 val records = threadMessageRecordDao.fetchRecords(
                     threadId = thread,
                     limit = LIMIT,
                     offset = skip
                 )
-                println("fetch result was $records")
 
                 records.forEach {
                     when (it.type) {
@@ -81,19 +74,15 @@ class SmsMmsPager(
                 coroutineScope {
                     val mms = async {
                         withContext(Dispatchers.IO) {
-                            val mmsStart = System.currentTimeMillis()
-                            val list = mmsHelper.getMessagesForMms(thread, mmsIds)
-                            println("mms total took ${System.currentTimeMillis() - mmsStart}")
-                            list
+                            mmsHelper.getMessagesForMms(thread, mmsIds)
                         }
                     }
 
                     val sms = async {
                         withContext(Dispatchers.IO) {
-                            val smsStart = System.currentTimeMillis()
-                            val list = context.contentResolver.query(
+                            context.contentResolver.query(
                                 Telephony.Sms.CONTENT_URI,
-                                null,
+                                arrayOf("_id","body","type","date"),
                                 "_id IN (${smsIds.joinToString(",")})",
                                 null,
                                 null,
@@ -119,8 +108,6 @@ class SmsMmsPager(
                                 }
                                 smsList
                             } ?: emptyList()
-                            println("Sms took ${System.currentTimeMillis() - smsStart}")
-                            list
                         }
                     }
 
@@ -131,17 +118,12 @@ class SmsMmsPager(
                 val sort = System.currentTimeMillis()
                 messagesList.sortBy { -it.date }
 
-                println("Sort took ${System.currentTimeMillis() - sort}")
-                println("Load total took ${System.currentTimeMillis() - loadStart}")
-
                 LoadResult.Page(
                     data = messagesList,
                     prevKey = if (page == 0) null else page - 1,
                     nextKey = if (messagesList.size < LIMIT) null else page + 1
                 )
             }
-
-            return page
 
         }
     }

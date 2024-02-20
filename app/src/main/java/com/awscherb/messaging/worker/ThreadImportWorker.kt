@@ -280,7 +280,6 @@ class ThreadImportWorker(
 
         val topThreads = threads.take(20).map { it.threadId }.toTypedArray()
 
-        println("top threads are ${topThreads.size}")
         return Result.success(
             workDataOf(TOP_THREADS to topThreads)
         )

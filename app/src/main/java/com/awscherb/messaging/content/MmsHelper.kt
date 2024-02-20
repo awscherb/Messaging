@@ -32,7 +32,7 @@ class MmsHelper @Inject constructor(
         val mmsStart = System.currentTimeMillis()
         context.contentResolver.query(
             Uri.parse("content://mms"),
-            null,
+            arrayOf("_id", "msg_box", "date"),
             "_id IN (${ids.joinToString(separator = ",")})",
             null,
             null

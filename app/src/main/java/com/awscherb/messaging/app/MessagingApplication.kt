@@ -24,13 +24,6 @@ class MessagingApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var contactService: ContactService
 
-    override fun onCreate() {
-        super.onCreate()
-        GlobalScope.launch {
-            println("total rows ${threadMessageRecordDao.countRows()}")
-        }
-    }
-
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setMinimumLoggingLevel(android.util.Log.INFO)
