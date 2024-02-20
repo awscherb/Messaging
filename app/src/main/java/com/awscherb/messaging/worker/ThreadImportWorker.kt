@@ -1,15 +1,13 @@
 package com.awscherb.messaging.worker
 
 import android.content.Context
-import android.database.DatabaseUtils
 import android.net.Uri
-import android.provider.ContactsContract
 import android.util.Log
 import androidx.core.database.getStringOrNull
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.awscherb.messaging.ThreadDao
+import com.awscherb.messaging.dao.ThreadDao
 import com.awscherb.messaging.data.MessageThread
 import com.awscherb.messaging.data.MessageType
 import com.awscherb.messaging.service.ContactService
@@ -28,7 +26,10 @@ class ThreadImportWorker(
 
     companion object {
 
+        const val TOP_THREADS = "top_threads"
+
         const val ThreadsFullSync = "threads_full_sync"
+        const val SingleSync = "single_sync"
 
         const val Step = "step"
         const val CheckingForUpdates = "Checking for updates"
@@ -51,6 +52,7 @@ class ThreadImportWorker(
     override suspend fun doWork(): Result {
         println("Starting ThreadImportWorker...")
 
+        val singleSync = inputData.getBoolean(SingleSync, false)
         val savedThreadCount = threadDao.getLastUpdated().associate { it.threadId to it.date }
 
         val contentResolver = context.contentResolver
@@ -58,6 +60,7 @@ class ThreadImportWorker(
         // thread id - time
         val deviceMessageMap = mutableMapOf<String, Long>()
         val toUpsert = mutableSetOf<String>()
+        val allThreads = mutableListOf<String>()
         // todo
         val toDelete = mutableSetOf<String>()
 
@@ -82,12 +85,16 @@ class ThreadImportWorker(
                     continue
                 }
 
+                allThreads.add(threadId)
+
                 if (threadId !in savedThreadCount.keys) {
-                    println("threadId $threadId ${savedThreadCount.keys}")
                     toUpsert += threadId
                 }
 
                 deviceMessageMap[threadId] = date
+                if (singleSync) {
+                    break
+                }
                 it.moveToNext()
             }
         }
@@ -101,7 +108,7 @@ class ThreadImportWorker(
 
         if (toUpsert.size == 0) {
             Log.i("ThreadImportWorker", "All threads up to date")
-            return Result.success()
+            return Result.success(workDataOf(TOP_THREADS to allThreads.take(20).toTypedArray()))
         }
 
         setProgress(workDataOf(Step to FetchingThreads))
@@ -257,6 +264,7 @@ class ThreadImportWorker(
                 participants = it.recipients.map { recipId ->
                     recipContactMap[recipId] ?: recipAddrMap[recipId] ?: ""
                 },
+                addresses = it.recipients.map { recip -> recipAddrMap[recip] }.filterNotNull(),
                 message = if (it.type == 0) it.message else threadIdBodyMap[it.id] ?: "",
                 date = it.date,
                 fromMe = it.fromMe,
@@ -270,7 +278,12 @@ class ThreadImportWorker(
             threadDao.insertAll(chunk)
         }
 
-        return Result.success()
+        val topThreads = threads.take(20).map { it.threadId }.toTypedArray()
+
+        println("top threads are ${topThreads.size}")
+        return Result.success(
+            workDataOf(TOP_THREADS to topThreads)
+        )
     }
 
     private fun getMmsText(id: String): String {

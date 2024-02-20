@@ -136,7 +136,7 @@ fun ThreadRow(
         ) {
 
             Text(
-                text = getDisplayNames(messageThread.participants),
+                text = messageThread.getTitle(),
                 modifier = Modifier,
                 style = Typography.titleSmall,
                 maxLines = 1,
@@ -189,15 +189,6 @@ fun MessageNameCircle(
     }
 }
 
-private fun getDisplayNames(names: List<String>): String {
-    return when {
-        names.isEmpty() -> ""
-        else -> {
-            names.joinToString(separator = ", ") { it.toFirstName() }
-        }
-    }
-}
-
 private fun getPreviewText(names: List<String>): List<String> {
     return if (names.isEmpty() || names.all { it.isBlank() }) {
         listOf("?")
@@ -210,18 +201,12 @@ private fun getPreviewText(names: List<String>): List<String> {
 
 private fun String.toInitials(): String {
     return when {
+        this.isEmpty() -> ""
         !this.contains(" ") -> this[0].toString()
         else -> {
             val parts = this.split(" ")
             return parts[0][0].toString() + parts[1][0].toString()
         }
-    }
-}
-
-private fun String.toFirstName(): String {
-    return when {
-        !this.contains(" ") -> this
-        else -> this.split(" ")[0]
     }
 }
 
@@ -239,7 +224,8 @@ fun MessageRowPreview() {
                 date = System.currentTimeMillis() - 1232222,
                 fromMe = false,
                 read = true,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -257,7 +243,8 @@ fun MessageRowEmptyNamePreview() {
                 date = System.currentTimeMillis() - 5000000000,
                 fromMe = true,
                 read = true,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -276,7 +263,8 @@ fun MessageRowNumberPreview() {
                 date = System.currentTimeMillis(),
                 read = false,
                 fromMe = false,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -295,7 +283,8 @@ fun MessageRowEmptyNameStringPreview() {
                 date = System.currentTimeMillis(),
                 fromMe = true,
                 read = false,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -314,7 +303,8 @@ fun MessageRowTwoNamePreview() {
                 date = System.currentTimeMillis() - 50000000000,
                 read = true,
                 fromMe = true,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -333,7 +323,8 @@ fun MessageRowThreeNamePreview() {
                 date = System.currentTimeMillis(),
                 read = true,
                 fromMe = false,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -352,7 +343,8 @@ fun MessageRowFourNamePreview() {
                 date = System.currentTimeMillis(),
                 fromMe = true,
                 read = false,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }
@@ -378,7 +370,8 @@ fun MessageRowManyPreview() {
                 date = System.currentTimeMillis(),
                 read = false,
                 fromMe = false,
-                threadType = MessageType.SMS
+                threadType = MessageType.SMS,
+                addresses = emptyList()
             )
         )
     }

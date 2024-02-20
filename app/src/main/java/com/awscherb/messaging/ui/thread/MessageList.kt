@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.awscherb.messaging.data.Message
 import com.awscherb.messaging.ui.util.TimeHolder
 import java.io.IOException
 import java.io.InputStream
@@ -140,9 +141,10 @@ private fun getMmsImage(_id: String, context: Context): Bitmap? {
 fun MessageListPreview() {
     MessageList(
         messages = listOf(
-            Message("1", "Hello, world!", true, "3125550690", System.currentTimeMillis()),
+            Message("1", "1","Hello, world!", true, "3125550690", System.currentTimeMillis()),
             Message(
                 "2",
+                "1",
                 "hey back!",
                 false,
                 "Contact",
@@ -151,6 +153,7 @@ fun MessageListPreview() {
             ),
             Message(
                 "3",
+                "1",
                 "text",
                 false,
                 null,

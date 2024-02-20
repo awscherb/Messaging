@@ -1,9 +1,11 @@
 package com.awscherb.messaging.content
 
 import android.content.Context
+import android.database.DatabaseUtils
 import android.net.Uri
+import com.awscherb.messaging.dao.MessageDao
+import com.awscherb.messaging.data.Message
 import com.awscherb.messaging.service.ContactService
-import com.awscherb.messaging.ui.thread.Message
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedReader
 import java.io.IOException
@@ -19,10 +21,11 @@ class MmsHelper @Inject constructor(
 ) {
 
     suspend fun getMessagesForMms(
+        threadId: String,
         ids: List<String>,
     ): List<Message> {
 
-        val messageIdPartial = mutableMapOf<String,MmsPartial>()
+        val messageIdPartial = mutableMapOf<String, MmsPartial>()
 
         val messageIds = mutableListOf<String>()
 
@@ -112,15 +115,24 @@ class MmsHelper @Inject constructor(
                             } else {
                                 it.getString(it.getColumnIndexOrThrow("text"))
                             }
-                            messageIdPartial[mid] = messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
-                                body = body
-                            )
+                            messageIdPartial[mid] =
+                                messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
+                                    body = body
+                                )
                         }
 
                         "image/jpeg" -> {
-                            messageIdPartial[mid] = messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
-                                data = partId
-                            )
+                            messageIdPartial[mid] =
+                                messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
+                                    data = partId
+                                )
+                        }
+
+                        "image/png" -> {
+                            messageIdPartial[mid] =
+                                messageIdPartial.getOrDefault(mid, MmsPartial(mid)).copy(
+                                    data = partId
+                                )
                         }
 
                         else -> {
@@ -137,11 +149,12 @@ class MmsHelper @Inject constructor(
         messageIdPartial.forEach { (mId, partial) ->
             msglist += Message(
                 id = mId,
-                text = partial.body ?: "empty",
+                text = partial.body ?: "",
                 fromMe = partial.fromMe == true,
                 contact = partial.contact,
                 date = partial.date ?: 0L,
-                data = partial.data
+                data = partial.data,
+                threadId = threadId
             )
         }
         return msglist

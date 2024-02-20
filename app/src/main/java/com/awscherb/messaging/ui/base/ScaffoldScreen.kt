@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.awscherb.messaging.ui.theme.MessagingTheme
 
@@ -43,7 +44,11 @@ fun ScaffoldScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = title)
+                    Text(
+                        text = title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 },
                 actions = topBarActions,
                 navigationIcon = {

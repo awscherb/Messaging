@@ -88,7 +88,8 @@ fun MessageScreenPreview() {
                     participants = listOf("212"),
                     read = false,
                     fromMe = false,
-                    threadType = MessageType.SMS
+                    threadType = MessageType.SMS,
+                    addresses = emptyList()
                 )
             )
         ) {

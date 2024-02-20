@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.awscherb.messaging.ThreadDao
+import com.awscherb.messaging.dao.ThreadDao
 import com.awscherb.messaging.worker.ThreadImportWorker
 import com.awscherb.messaging.worker.ThreadImportWorker.Companion.ThreadsFullSync
 import dagger.hilt.android.lifecycle.HiltViewModel

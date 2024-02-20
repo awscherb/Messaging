@@ -1,4 +1,4 @@
-package com.awscherb.messaging
+package com.awscherb.messaging.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -25,5 +25,8 @@ interface ThreadDao {
 
     @Query("SELECT threadId, date from MessageThread")
     suspend fun getLastUpdated(): List<ThreadLastUpdated>
+
+    @Query("SELECT * FROM MessageThread WHERE threadId = :threadId")
+    fun getThread(threadId: String): Flow<List<MessageThread>>
 
 }

@@ -24,12 +24,14 @@ import androidx.navigation.navArgument
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.awscherb.messaging.data.MessageType
 import com.awscherb.messaging.service.ContactService
 import com.awscherb.messaging.ui.threadList.ThreadListScreen
 import com.awscherb.messaging.ui.theme.MessagingTheme
 import com.awscherb.messaging.ui.thread.ThreadScreen
 import com.awscherb.messaging.worker.ThreadImportWorker
+import com.awscherb.messaging.worker.ThreadRecordWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -89,6 +91,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(Destination.Messages.dest) {
                             ThreadListScreen {
+                                syncRecords(it.threadId)
                                 when (it.threadType) {
                                     MessageType.SMS -> navController.navigate("sms/${it.threadId}")
                                     MessageType.MMS -> navController.navigate("mms/${it.threadId}")
@@ -120,6 +123,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun syncRecords(threadId: String) {
+        val req = OneTimeWorkRequestBuilder<ThreadRecordWorker>()
+            .setInputData(workDataOf(ThreadRecordWorker.THREAD_ID to arrayOf(threadId)))
+            .build()
+
+        WorkManager.getInstance(this)
+            .enqueue(req)
+    }
+
     private fun startImport() {
         val req = OneTimeWorkRequestBuilder<ThreadImportWorker>()
             .addTag(ThreadImportWorker.ThreadsFullSync)
@@ -130,10 +142,20 @@ class MainActivity : ComponentActivity() {
 
             getWorkInfoByIdFlow(req.id)
                 .onEach {
-                    it.progress.getString(ThreadImportWorker.Step)
                     when (it.state) {
                         WorkInfo.State.SUCCEEDED -> {
-                            println("Import SUCCESS")
+                            val topThreads = it.outputData.getStringArray(
+                                ThreadImportWorker.TOP_THREADS
+                            ) ?: emptyArray()
+
+                            val syncMessages = OneTimeWorkRequestBuilder<ThreadRecordWorker>()
+                                .setInputData(workDataOf(
+                                    ThreadRecordWorker.THREAD_ID to topThreads
+                                ))
+                                .build()
+
+                            enqueue(syncMessages)
+
                         }
 
                         WorkInfo.State.FAILED -> {

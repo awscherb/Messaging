@@ -2,7 +2,9 @@ package com.awscherb.messaging.db
 
 import android.content.Context
 import androidx.room.Room
-import com.awscherb.messaging.ThreadDao
+import com.awscherb.messaging.dao.MessageDao
+import com.awscherb.messaging.dao.ThreadDao
+import com.awscherb.messaging.dao.ThreadMessageRecordDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,5 +31,14 @@ interface DatabaseModule {
         @Provides
         @Singleton
         fun provideThreadsDao(db: MessagingDatabase): ThreadDao = db.threadDao()
+
+        @Provides
+        @Singleton
+        fun provideMessageDao(db: MessagingDatabase): MessageDao = db.messageDao()
+
+        @Provides
+        @Singleton
+        fun provideThreadMessageRecordDao(db: MessagingDatabase): ThreadMessageRecordDao =
+            db.threadMessageRecordDao()
     }
 }
