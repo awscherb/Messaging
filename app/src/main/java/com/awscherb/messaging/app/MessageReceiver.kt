@@ -3,6 +3,7 @@ package com.awscherb.messaging.app
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.telephony.ims.ImsManager
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -33,7 +34,7 @@ class MessageReceiver : BroadcastReceiver() {
                 .onEach {
                     when (it?.state) {
                         WorkInfo.State.SUCCEEDED -> {
-                            val topThreads = it.outputData.getStringArray(
+                            val topThreads = it .outputData.getStringArray(
                                 ThreadImportWorker.TOP_THREADS
                             ) ?: emptyArray()
 

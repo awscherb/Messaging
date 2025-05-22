@@ -21,6 +21,9 @@ class SmsMmsPager(
     val threadMessageRecordDao: ThreadMessageRecordDao,
     val mmsHelper: MmsHelper
 ) {
+
+    private var currentSource: PagingSource<Int, Message>? = null
+
     fun getPagerFlow(threadId: String) = Pager(
         config = PagingConfig(pageSize = SmsMmsPagingSource.LIMIT),
         pagingSourceFactory = {
@@ -29,9 +32,15 @@ class SmsMmsPager(
                 thread = threadId,
                 threadMessageRecordDao = threadMessageRecordDao,
                 mmsHelper = mmsHelper
-            )
+            ).also {
+                currentSource = it
+            }
         }
     ).flow
+
+    fun invalidate() {
+        currentSource?.invalidate()
+    }
 
     class SmsMmsPagingSource(
         val context: Context,

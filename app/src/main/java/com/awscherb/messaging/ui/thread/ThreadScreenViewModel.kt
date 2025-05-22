@@ -33,6 +33,7 @@ class ThreadScreenViewModel @Inject constructor(
     @ApplicationContext context: Context
 ) : AndroidViewModel(context as Application) {
 
+    private val pager = SmsMmsPager(context, threadMessageRecordDao, mmsHelper)
     private val smsService = context.getSystemService(SmsManager::class.java)
 
     val threadId = savedStateHandle.get<String>("id")!!
@@ -42,7 +43,7 @@ class ThreadScreenViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val pagingFlow: Flow<PagingData<Message>> =
-        SmsMmsPager(context, threadMessageRecordDao, mmsHelper).getPagerFlow(threadId)
+        pager.getPagerFlow(threadId)
 
     fun sendTextMessage(message: String) {
         thread.value?.let {
@@ -54,6 +55,7 @@ class ThreadScreenViewModel @Inject constructor(
                     smsService.sendTextMessage(it.addresses.first(), null, message, null, null)
                 }
             }
+            pager.invalidate()
         }
     }
 

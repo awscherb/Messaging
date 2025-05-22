@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,16 +40,21 @@ fun MessageList(
     modifier: Modifier = Modifier,
     messages: List<Message>
 ) {
-    LazyColumn(modifier = modifier, reverseLayout = true) {
-        items(messages, key = { it.id }, contentType = { it.fromMe }) {
-            MessageBubble(message = it)
+    LazyColumn(modifier = modifier, reverseLayout = false) {
+        itemsIndexed(
+            messages,
+            key = { index, message -> message.id },
+            contentType = { index, message -> message.fromMe })
+        { index, message ->
+            MessageBubble(message = message)
         }
     }
 }
 
 @Composable
 fun MessageBubble(
-    message: Message
+    message: Message,
+    showTime: Boolean = true,
 ) {
     val screenWidth = (LocalConfiguration.current.screenWidthDp)
     Column(
@@ -107,12 +112,14 @@ fun MessageBubble(
 
         val contact = message.contact
         val prefix = if (contact != null) "$contact • " else ""
-        Text(
-            text = prefix + TimeHolder.prettyTime.format(Date(message.date)),
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .align(aligment)
-        )
+        if (showTime) {
+            Text(
+                text = prefix + TimeHolder.prettyTime.format(Date(message.date)),
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .align(aligment)
+            )
+        }
     }
 }
 
@@ -141,7 +148,8 @@ private fun getMmsImage(_id: String, context: Context): Bitmap? {
 fun MessageListPreview() {
     MessageList(
         messages = listOf(
-            Message("1", "1","Hello, world!", true, "3125550690", System.currentTimeMillis()),
+            Message("0", "1", "Hello, world!", true, "3125550690", System.currentTimeMillis()),
+            Message("1", "1", "Hello, world!", false, "3125550690", System.currentTimeMillis()),
             Message(
                 "2",
                 "1",
@@ -153,6 +161,23 @@ fun MessageListPreview() {
             ),
             Message(
                 "3",
+                "1",
+                "text",
+                false,
+                null,
+                System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000,
+                "sata"
+            ),
+            Message(
+                "4",
+                "1",
+                "text",
+                false,
+                null,
+                System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000,
+                "sata"
+            ),   Message(
+                "5",
                 "1",
                 "text",
                 false,
