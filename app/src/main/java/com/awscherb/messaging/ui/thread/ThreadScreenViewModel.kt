@@ -51,6 +51,7 @@ class ThreadScreenViewModel @Inject constructor(
                     smsService.sendTextMessage(it.addresses.first(), null, message, null, null)
                 }
                 MessageType.MMS -> {
+                    smsService.sendTextMessage(it.addresses.first(), null, message, null, null)
                 }
             }
         }

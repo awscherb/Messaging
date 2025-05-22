@@ -31,7 +31,7 @@ class MessageReceiver : BroadcastReceiver() {
 
             getWorkInfoByIdFlow(req.id)
                 .onEach {
-                    when (it.state) {
+                    when (it?.state) {
                         WorkInfo.State.SUCCEEDED -> {
                             val topThreads = it.outputData.getStringArray(
                                 ThreadImportWorker.TOP_THREADS

@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -29,6 +31,7 @@ import com.awscherb.messaging.data.MessageType
 import com.awscherb.messaging.service.ContactService
 import com.awscherb.messaging.ui.threadList.ThreadListScreen
 import com.awscherb.messaging.ui.theme.MessagingTheme
+import com.awscherb.messaging.ui.theme.PurpleGrey40
 import com.awscherb.messaging.ui.thread.ThreadScreen
 import com.awscherb.messaging.worker.ThreadImportWorker
 import com.awscherb.messaging.worker.ThreadRecordWorker
@@ -64,6 +67,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
 
         if (Permissions.any {
                 checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
@@ -142,7 +147,7 @@ class MainActivity : ComponentActivity() {
 
             getWorkInfoByIdFlow(req.id)
                 .onEach {
-                    when (it.state) {
+                    when (it?.state) {
                         WorkInfo.State.SUCCEEDED -> {
                             val topThreads = it.outputData.getStringArray(
                                 ThreadImportWorker.TOP_THREADS
